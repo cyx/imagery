@@ -1,0 +1,17 @@
+<% require "./lib/imagery" -%>
+Gem::Specification.new do |s|
+  s.name              = "imagery"
+  s.version           = "<%= Imagery::VERSION %>"
+  s.summary           = "POROS + GraphicsMagick."
+  s.description       = "Provide a clean and light interface around GraphicsMagick."
+  s.authors           = ["Cyril David"]
+  s.email             = ["me@cyrildavid.com"]
+  s.homepage          = "http://github.com/cyx/imagery"
+  s.files = <%= Dir[
+    "LICENSE",
+    "README.markdown",
+    "lib/**/*.rb",
+    "*.gemspec",
+    "test/*.*"
+  ].inspect %>
+end
