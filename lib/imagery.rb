@@ -1,4 +1,5 @@
 require "fileutils"
+require "tempfile"
 
 class Imagery
   VERSION = "0.1.0"
@@ -6,7 +7,10 @@ class Imagery
   autoload :S3,     "imagery/s3"
   autoload :Faking, "imagery/faking"
   autoload :Test,   "imagery/test"
-  
+
+  # Raised during Imagery#save if the image can't be recognized.
+  InvalidImage = Class.new(StandardError)
+
   # Acts as a namespace, e.g. `photos`.
   attr :prefix
 
@@ -17,17 +21,17 @@ class Imagery
   #
   # - The first element if the tuple is the resize geometry.
   # - The second (optional) element describes the extent.
-  # 
+  #
   # @example
-  # 
+  #
   #     Imagery.new(:photos, "1001", tiny: ["90x90^", "90x90"])
   #
   # @see http://www.graphicsmagick.org/GraphicsMagick.html#details-geometry
   # @see http://www.graphicsmagick.org/GraphicsMagick.html#details-extent
   attr :sizes
-  
-  # In order to facilitate a plugin architecture, all overridable methods 
-  # are placed in the `Core` module. Imagery::S3 demonstrates this overriding
+
+  # In order to facilitate a plugin architecture, all overridable methods
+  # are placed in the `Core` module. Imagery::S3 demonstrates overriding
   # in action.
   module Core
     def initialize(prefix, key = nil, sizes = {})
@@ -46,28 +50,44 @@ class Imagery
 
       "/#{prefix}/#{key}/#{ext(file)}"
     end
-  
-    # Accepts an `IO` object, typically taken from a input[type=file].
-    # 
+
+    # Accepts an `IO` object, typically taken from an input[type=file].
+    #
     # The second optional `key` argument is used when you want to force
     # a new resource, useful in conjunction with cloudfront / high cache
     # scenarios where updating an existing image won't suffice.
+    #
+    # @example
+    #   # Let's say we're in the context of a Sinatra handler,
+    #   # and a file was submitted to params[:file]
+    #
+    #   post "upload" do
+    #     im = Imagery.new(:avatar, current_user.id, thumb: ["20x20"])
+    #     im.save(params[:file][:tempfile])
+    #
+    #     # At this point we have two files, original.jpg and thumb.jpg
+    #
+    #     { original: im.url, thumb: im.url(:thumb) }.to_json
+    #   end
+    #
     def save(io, key = nil)
+      GM.identify(io) or raise(InvalidImage)
+
       # We delete the existing object iff:
       # 1. A key was passed
       # 2. The key passed is different from the existing key.
       delete if key && key != self.key
-  
+
       # Now we can assign the new key passed, with the assurance that the
       # old key has been deleted and won't be used anymore.
       @key = key.to_s if key
-  
+
       # Ensure that the path to all images is created.
       FileUtils.mkdir_p(root)
-  
+
       # Write the original filename as binary using the `IO` object's data.
       File.open(root(ext(@original)), "wb") { |file| file.write(io.read) }
-  
+
       # We resize the original raw image to different sizes which we
       # defined in the constructor. GraphicsMagick is assumed to exist
       # within the machine.
@@ -75,7 +95,7 @@ class Imagery
         GM.convert root(ext(@original)), root(ext(size)), resize, extent
       end
     end
-  
+
     # A very simple and destructive method. Deletes the entire folder
     # for the current prefix/key combination.
     def delete
@@ -83,17 +103,17 @@ class Imagery
     end
   end
   include Core
-  
-  # Returns the base filename together with the extension, 
+
+  # Returns the base filename together with the extension,
   # which defaults to jpg.
   def ext(file)
     "#{file}.#{@ext}"
   end
-  
+
   def root(*args)
     self.class.root(prefix, key, *args)
   end
-  
+
   def self.root(*args)
     File.join(@root, *args)
   end
@@ -109,16 +129,43 @@ class Imagery
     # -quality we force it to 80, which is very reasonable and practical.
     CONVERT = "gm convert -size '%s' '%s' -resize '%s' %s -quality 80 '%s'"
 
+    # 2 is the file descriptor for stderr, which `gm identify`
+    # happily chucks out information to, regardless if the image
+    # was identified or not.
+    #
+    # We utilize the fact that gm identify exits with a status of 1 if
+    # it fails to identify the image.
+    #
+    # @see for an explanation of file descriptions and redirection.
+    #   http://stackoverflow.com/questions/818255/in-the-bash-shell-what-is-21
+    IDENTIFY = "gm identify '%s' 2> /dev/null"
+
     def self.convert(src, dst, resize, extent = nil)
       system(sprintf(CONVERT, dim(resize), src, resize, extent(extent), dst))
     end
-  
-    # Return the cleaned dimension representation minus the 
+
+    def self.identify(io)
+      file = Tempfile.new("imagery")
+      file.write(io.read)
+      file.close
+
+      `gm identify #{io.path} 2> /dev/null`
+
+      return $?.success?
+    ensure
+      # Very important, else `io.read` will return "".
+      io.rewind
+
+      # Tempfile quickly runs out of names, so best to avoid that.
+      file.unlink
+    end
+
+    # Return the cleaned dimension representation minus the
     # geometry directives.
     def self.dim(dim)
       dim.gsub(/\^><!/, "")
     end
-  
+
     # Cropping and all that nice presentation kung-fu.
     #
     # @see http://www.graphicsmagick.org/GraphicsMagick.html#details-extent

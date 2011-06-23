@@ -105,7 +105,7 @@ scope do
 
     assert_equal "1024x768", resolution(im.root("original.jpg"))
 
-    # Since there was no extent or geometry specified, this will 
+    # Since there was no extent or geometry specified, this will
     # be resized by fitting the image proportionally within 100x100.
     assert_equal "100x75", resolution(im.root("small.jpg"))
 
@@ -127,5 +127,46 @@ scope do
     im.save(io)
 
     assert_equal "100x100", resolution(im.root("small.jpg"))
+  end
+end
+
+# saving a corrupted / unrecognized file
+scope do
+  setup do
+    imagery = Imagery.new(:avatar, 1, small: ["100x100^", "100x100"])
+    io = File.open(fixture("r8.jpg"), "rb")
+
+    [imagery, io]
+  end
+
+  test "creating a new image" do |im, io|
+    ex = nil
+
+    begin
+      im.save(File.open(fixture("broken.jpg"), "rb"))
+    rescue Imagery::InvalidImage => e
+      ex = e
+    end
+
+    assert ex
+
+    o, s = im.root("original.jpg"), im.root("small.jpg")
+
+    assert ! File.exist?(o)
+    assert ! File.exist?(s)
+  end
+
+  test "trying to save over an existing image" do |im, io|
+    im.save(io)
+
+    o, s = im.root("original.jpg"), im.root("small.jpg")
+
+    begin
+      im.save(File.open(fixture("broken.jpg"), "rb"), 2)
+    rescue Imagery::InvalidImage
+    end
+
+    assert File.exist?(o)
+    assert File.exist?(s)
   end
 end
