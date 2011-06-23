@@ -146,8 +146,14 @@ class Imagery
 
     def self.identify(io)
       file = Tempfile.new("imagery")
+
+      # Something poorly documented, but vastly important: we need to
+      # make sure the file is in binary mode.
+      file.binmode
+
+      # Now we can safely write the file knowing that we're operating in
+      # binary mode.
       file.write(io.read)
-      file.close
 
       `gm identify #{io.path} 2> /dev/null`
 
@@ -157,7 +163,7 @@ class Imagery
       io.rewind
 
       # Tempfile quickly runs out of names, so best to avoid that.
-      file.unlink
+      file.close!
     end
 
     # Return the cleaned dimension representation minus the
