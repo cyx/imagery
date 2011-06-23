@@ -2,7 +2,7 @@ require "fileutils"
 require "tempfile"
 
 class Imagery
-  VERSION = "0.2.0"
+  VERSION = "0.2.1"
 
   autoload :S3,     "imagery/s3"
   autoload :Faking, "imagery/faking"
