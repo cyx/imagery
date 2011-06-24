@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name              = "imagery"
-  s.version           = "0.2.1"
+  s.version           = "0.2.2"
   s.summary           = "POROS + GraphicsMagick."
   s.description       = "Provide a clean and light interface around GraphicsMagick."
   s.authors           = ["Cyril David"]
