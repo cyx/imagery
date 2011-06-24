@@ -81,6 +81,9 @@ scope do
   test "saving with an already existing image" do |im, io|
     im.save(io)
 
+    # Kind of irregular, but we need to rewind this.
+    io.rewind
+
     assert im.save(io, "GUID")
     assert File.exist?(Imagery.root("avatar/GUID/original.jpg"))
     assert ! File.exist?(Imagery.root("avatar/1001/original.jpg"))
