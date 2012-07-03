@@ -121,6 +121,10 @@ class Imagery
   end
   self.root = File.join(Dir.pwd, "public")
 
+  def self.inherited(child)
+    child.root = root
+  end
+
   module GM
     # -size tells GM to only read from a given dimension.
     # -resize is the target dimension, and understands geometry strings.

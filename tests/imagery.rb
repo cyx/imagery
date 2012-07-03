@@ -172,4 +172,11 @@ scope do
     assert File.exist?(o)
     assert File.exist?(s)
   end
+
+  test "inherting imagery" do |im, io|
+    class Photo < Imagery
+    end
+
+    assert_equal Photo.root, Imagery.root
+  end
 end
