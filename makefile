@@ -1,0 +1,2 @@
+test:
+	cutest tests/*.rb
