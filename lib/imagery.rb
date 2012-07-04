@@ -34,7 +34,7 @@ class Imagery
   module Core
     def initialize(prefix, key = nil, sizes = {})
       @prefix   = prefix.to_s
-      @key      = key.to_s
+      @key      = key.to_s if key
       @sizes    = sizes
       @original = :original      # Used as the filename for the raw image.
       @ext      = :jpg           # We default to jpg for the image format.
@@ -74,7 +74,7 @@ class Imagery
       # We delete the existing object iff:
       # 1. A key was passed
       # 2. The key passed is different from the existing key.
-      delete if key && key != self.key
+      delete if key && self.key && key != self.key
 
       # Now we can assign the new key passed, with the assurance that the
       # old key has been deleted and won't be used anymore.
@@ -97,6 +97,8 @@ class Imagery
     # A very simple and destructive method. Deletes the entire folder
     # for the current prefix/key combination.
     def delete
+      return if not key
+
       FileUtils.rm_rf(root)
     end
   end

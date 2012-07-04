@@ -173,6 +173,27 @@ scope do
     assert File.exist?(s)
   end
 
+  test "no deletion when existing key is nil" do |_, io|
+    im = Imagery.new(:avatar, nil, small: ["100x100^", "100x100"])
+
+    def im.delete
+      raise RuntimeError
+    end
+
+    begin
+      im.save(io, 1)
+    rescue RuntimeError => ex
+    end
+
+    assert_equal nil, ex
+  end
+
+  test "deletion not possible when key is nil" do |_, io|
+    im = Imagery.new(:avatar, nil, small: ["100x100^", "100x100"])
+
+    assert_equal nil, im.delete
+  end
+
   test "inherting imagery" do |im, io|
     class Photo < Imagery
     end
