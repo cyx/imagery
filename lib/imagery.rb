@@ -34,7 +34,7 @@ class Imagery
   module Core
     def initialize(prefix, id = nil, sizes = {})
       @prefix   = prefix.to_s
-      @id       = id.to_s if id 
+      @id       = id.to_s if id
       @sizes    = sizes
       @original = :original      # Used as the filename for the raw image.
       @ext      = :jpg           # We default to jpg for the image format.
