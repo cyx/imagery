@@ -6,18 +6,18 @@ test "defining with a prefix" do
   assert_equal "avatar", i.prefix
 end
 
-test "defining with a key" do
+test "defining with a id" do
   i = Imagery.new(:avatar, "1001")
 
   assert_equal "avatar", i.prefix
-  assert_equal "1001", i.key
+  assert_equal "1001", i.id
 end
 
 test "defining with sizes" do
   i = Imagery.new(:avatar, "1001", small: ["100x100"])
 
   assert_equal "avatar", i.prefix
-  assert_equal "1001", i.key
+  assert_equal "1001", i.id
   assert_equal({ small: ["100x100"] }, i.sizes)
 end
 
@@ -41,18 +41,18 @@ test "allows override of the default Dir.pwd" do
   end
 end
 
-test "url when missing key" do
+test "url when missing id" do
   i = Imagery.new(:avatar)
 
   assert_equal "/missing/avatar/original.jpg", i.url
 end
 
-test "url with a key" do
+test "url with a id" do
   i = Imagery.new(:avatar, "1001")
   assert_equal "/avatar/1001/original.jpg", i.url
 end
 
-test "url with a key and a file" do
+test "url with a id and a file" do
   i = Imagery.new(:avatar, "1001")
   assert_equal "/avatar/1001/small.jpg", i.url(:small)
 end
@@ -73,7 +73,7 @@ scope do
     assert_equal "1024x768", resolution(im.root("original.jpg"))
   end
 
-  test "saving and specifying the key" do |im, io|
+  test "saving and specifying the id" do |im, io|
     assert im.save(io, "GUID")
     assert File.exist?(Imagery.root("avatar/GUID/original.jpg"))
   end
@@ -173,7 +173,7 @@ scope do
     assert File.exist?(s)
   end
 
-  test "no deletion when existing key is nil" do |_, io|
+  test "no deletion when existing id is nil" do |_, io|
     im = Imagery.new(:avatar, nil, small: ["100x100^", "100x100"])
 
     def im.delete
@@ -188,7 +188,7 @@ scope do
     assert_equal nil, ex
   end
 
-  test "deletion not possible when key is nil" do |_, io|
+  test "deletion not possible when id is nil" do |_, io|
     im = Imagery.new(:avatar, nil, small: ["100x100^", "100x100"])
 
     assert_equal nil, im.delete

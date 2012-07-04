@@ -13,7 +13,7 @@ class Imagery
   attr :prefix
 
   # A unique id for the image.
-  attr :key
+  attr :id
 
   # A hash of name => tuple pairs. The name describes the size, e.g. `small`.
   #
@@ -32,9 +32,9 @@ class Imagery
   # are placed in the `Core` module. Imagery::S3 demonstrates overriding
   # in action.
   module Core
-    def initialize(prefix, key = nil, sizes = {})
+    def initialize(prefix, id = nil, sizes = {})
       @prefix   = prefix.to_s
-      @key      = key.to_s if key
+      @id       = id.to_s if id 
       @sizes    = sizes
       @original = :original      # Used as the filename for the raw image.
       @ext      = :jpg           # We default to jpg for the image format.
@@ -42,16 +42,16 @@ class Imagery
 
     # Returns the url for a given size, which defaults to `:original`.
     #
-    # If the key is nil, a missing path is returned.
+    # If the id is nil, a missing path is returned.
     def url(file = @original)
-      return "/missing/#{prefix}/#{ext(file)}" if key.to_s.empty?
+      return "/missing/#{prefix}/#{ext(file)}" if id.to_s.empty?
 
-      "/#{prefix}/#{key}/#{ext(file)}"
+      "/#{prefix}/#{id}/#{ext(file)}"
     end
 
     # Accepts an `IO` object, typically taken from an input[type=file].
     #
-    # The second optional `key` argument is used when you want to force
+    # The second optional `id` argument is used when you want to force
     # a new resource, useful in conjunction with cloudfront / high cache
     # scenarios where updating an existing image won't suffice.
     #
@@ -68,17 +68,18 @@ class Imagery
     #     { original: im.url, thumb: im.url(:thumb) }.to_json
     #   end
     #
-    def save(io, key = nil)
+    def save(io, id = nil)
       GM.identify(io) or raise(InvalidImage)
 
       # We delete the existing object iff:
-      # 1. A key was passed
-      # 2. The key passed is different from the existing key.
-      delete if key && self.key && key != self.key
+      # 1. An id was passed
+      # 2. We have an existing id already.
+      # 3. The id passed is different from the existing id.
+      delete if id && self.id && id != self.id
 
-      # Now we can assign the new key passed, with the assurance that the
-      # old key has been deleted and won't be used anymore.
-      @key = key.to_s if key
+      # Now we can assign the new id passed, with the assurance that the
+      # old id has been deleted and won't be used anymore.
+      @id = id.to_s if id
 
       # Ensure that the path to all images is created.
       FileUtils.mkdir_p(root)
@@ -95,9 +96,9 @@ class Imagery
     end
 
     # A very simple and destructive method. Deletes the entire folder
-    # for the current prefix/key combination.
+    # for the current prefix/id combination.
     def delete
-      return if not key
+      return if not id
 
       FileUtils.rm_rf(root)
     end
@@ -111,7 +112,7 @@ class Imagery
   end
 
   def root(*args)
-    self.class.root(prefix, key, *args)
+    self.class.root(prefix, id, *args)
   end
 
   def self.root(*args)

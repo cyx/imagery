@@ -78,7 +78,7 @@ scope do
     assert cmds.empty?
   end
 
-  test "doesn't delete when passing same key" do |im, io|
+  test "doesn't delete when passing same id" do |im, io|
     im.save(io, "1001")
   
     cmds = Imagery::S3::Gateway.commands
@@ -90,7 +90,7 @@ scope do
     assert cmds.empty?
   end
 
-  test "deletes when passing a different key" do |im, io|
+  test "deletes when passing a different id" do |im, io|
     im.save(io, "1002")
   
     cmds = Imagery::S3::Gateway.commands

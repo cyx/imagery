@@ -4,7 +4,7 @@ class Imagery
   module S3
     def self.included(imagery)
       imagery.extend Config
-  
+
       # Set the default host for amazon S3. You can also set this
       # to https://s3.amazon.com if you want to force secure connections
       # on a global scale.
@@ -36,7 +36,7 @@ class Imagery
 
       @keys = [@original] + sizes.keys
     end
-    
+
     # If you specify a distribution domain (i.e. a cloudfront domain,
     # or even an S3 domain with a prefix), that distribution domain is
     # used.
@@ -49,8 +49,8 @@ class Imagery
         "#{self.class.s3_host}/#{self.class.s3_bucket}#{super}"
       end
     end
-  
-    # Returns the complete S3 key used for this object. The S3 key
+
+    # Returns the complete S3 id used for this object. The S3 id
     # is simply composed of the prefix and filename, e.g.
     #
     # - photos/1001/original.jpg
@@ -58,9 +58,9 @@ class Imagery
     # - photos/1001/tiny.jpg
     #
     def s3_key(file)
-      "#{prefix}/#{key}/#{ext(file)}"
+      "#{prefix}/#{id}/#{ext(file)}"
     end
-  
+
     # Deletes all keys defined for this object, which includes `:original`
     # and all keys in `sizes`.
     def delete
@@ -70,11 +70,11 @@ class Imagery
         Gateway.delete(s3_key(file), self.class.s3_bucket)
       end
     end
-  
+
     # Save the object as we normall would, but also upload all resulting
     # files to S3. We set the proper content type and Cache-Control setting
     # optimized for a cloudfront setup.
-    def save(io, key = nil)
+    def save(io, id = nil)
       super
 
       keys.each do |file|
@@ -87,18 +87,18 @@ class Imagery
         )
       end
     end
-  
+
     # Provides a convenience wrapper around AWS::S3::S3Object and
     # serves as an auto-connect module.
     module Gateway
       def self.store(*args)
         execute(:store, *args)
       end
-      
+
       def self.delete(*args)
         execute(:delete, *args)
       end
-    
+
     private
       def self.execute(command, *args)
         begin
