@@ -20,7 +20,7 @@ end
 
 test "changes url to an S3 hosted one" do
   i = Imagery.new(:avatar)
-  
+
   expect = "http://s3.amazonaws.com/cdn.site.com/missing/avatar/original.jpg"
   assert_equal expect, i.url
 end
@@ -30,7 +30,7 @@ test "allows an s3_host override" do
     Imagery.s3_host "https://foo.com"
 
     i = Imagery.new(:avatar)
-    
+
     expect = "https://foo.com/cdn.site.com/missing/avatar/original.jpg"
     assert_equal expect, i.url
   ensure
@@ -41,7 +41,7 @@ end
 test "allows a distribution domain for cloudfront hosted buckets" do
   begin
     Imagery.s3_distribution_domain "https://cdn.site.com"
-    
+
     i = Imagery.new(:avatar)
     expect = "https://cdn.site.com/missing/avatar/original.jpg"
     assert_equal expect, i.url
@@ -68,7 +68,7 @@ scope do
 
   test "saves all sizes to S3" do |im, io|
     im.save(io)
-  
+
     cmds = Imagery::S3::Gateway.commands
 
     assert_equal [:store, "avatar/1001/original.jpg", "buck"], cmds.shift
@@ -80,7 +80,7 @@ scope do
 
   test "doesn't delete when passing same id" do |im, io|
     im.save(io, "1001")
-  
+
     cmds = Imagery::S3::Gateway.commands
 
     assert_equal [:store, "avatar/1001/original.jpg", "buck"], cmds.shift
@@ -92,7 +92,7 @@ scope do
 
   test "deletes when passing a different id" do |im, io|
     im.save(io, "1002")
-  
+
     cmds = Imagery::S3::Gateway.commands
 
     assert_equal [:delete, "avatar/1001/original.jpg", "buck"], cmds.shift
