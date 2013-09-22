@@ -131,8 +131,9 @@ class Imagery
   module GM
     # -size tells GM to only read from a given dimension.
     # -resize is the target dimension, and understands geometry strings.
-    # -quality we force it to 80, which is very reasonable and practical.
-    CONVERT = "gm convert -size '%s' '%s' -resize '%s' %s -quality 80 '%s'"
+    # -quality we force it to 90, which is a bit aggressive, but
+    # we want beautiful photos don't we? :-)
+    CONVERT = "gm convert -size '%s' '%s' -resize '%s' %s -quality 90 '%s'"
 
     # 2 is the file descriptor for stderr, which `gm identify`
     # happily chucks out information to, regardless if the image
