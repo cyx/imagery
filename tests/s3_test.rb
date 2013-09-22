@@ -1,17 +1,5 @@
 require File.expand_path("helper", File.dirname(__FILE__))
 
-test "autloads" do
-  e = nil
-
-  begin
-    Imagery::S3
-  rescue Exception => ex
-    e = ex
-  end
-
-  assert e.nil?
-end
-
 class Imagery
   include S3
 

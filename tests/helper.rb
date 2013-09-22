@@ -2,6 +2,7 @@ $:.unshift(File.expand_path("../lib", File.dirname(__FILE__)))
 
 require "cutest"
 require "imagery"
+require "imagery/s3"
 
 def fixture(filename)
   File.expand_path("fixtures/#{filename}", File.dirname(__FILE__))

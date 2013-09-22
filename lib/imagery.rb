@@ -2,10 +2,6 @@ require "fileutils"
 require "tempfile"
 
 class Imagery
-  autoload :S3,     "imagery/s3"
-  autoload :Faking, "imagery/faking"
-  autoload :Test,   "imagery/test"
-
   # Raised during Imagery#save if the image can't be recognized.
   InvalidImage = Class.new(StandardError)
 
