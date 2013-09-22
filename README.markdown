@@ -69,10 +69,7 @@ end
 
 ## Extending
 
-You can check the current plugins for examples of writing extensions:
-
-1. Imagery::s3
-2. Imagery::Faking
+You can check `Imagery::S3` to see an example of an extension.
 
 ## Copyright
 
