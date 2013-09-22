@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name              = "imagery"
-  s.version           = "1.0.0.rc2"
-  s.summary           = "POROS + GraphicsMagick."
+  s.version           = "1.0.0"
+  s.summary           = "Simple image resizing"
   s.description       = "Clean & light interface around GraphicsMagick."
   s.authors           = ["Cyril David"]
-  s.email             = ["me@cyrildavid.com"]
+  s.email             = ["cyx@cyx.is"]
   s.homepage          = "http://github.com/cyx/imagery"
 
   s.files = Dir[
